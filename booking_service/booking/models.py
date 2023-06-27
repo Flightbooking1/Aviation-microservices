@@ -60,3 +60,15 @@ class Passenger(models.Model):
     class Meta:
         managed = False
         db_table = 'passengers'
+# Create your models here.
+class BookingHistory(models.Model):
+    booking_history_id = models.AutoField(primary_key=True)
+    no_of_tickets_booked = models.IntegerField()
+    date = models.DateField()
+    available_tickets = models.IntegerField()
+    schedule_id = models.IntegerField()
+    days_left = models.IntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'booking_history'

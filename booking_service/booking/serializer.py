@@ -59,3 +59,11 @@ class BookingSerializer(serializers.ModelSerializer):
             Passenger.objects.create(booking=booking, **passenger_item)
         print("created passengers ------------------------------------")
         return booking
+from .models import *
+
+#BookingHistory 
+class BookingHistorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = BookingHistory
+        fields = '__all__'

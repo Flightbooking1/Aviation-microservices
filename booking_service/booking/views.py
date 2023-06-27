@@ -4,8 +4,13 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 from booking.serializer import *
 from booking.models import *
+#BookingHistory
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import  ListModelMixin,RetrieveModelMixin,DestroyModelMixin,CreateModelMixin,UpdateModelMixin
+from django.shortcuts import render
+
+from .serializer import BookingHistorySerializer
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -146,3 +151,28 @@ def getBooking(request,id):
           return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class BookingInsertandGettingall(GenericAPIView,CreateModelMixin,ListModelMixin):
+     queryset = BookingHistory.objects.all()
+     serializer_class=BookingHistorySerializer
+     
+     def post(self,request):
+          logger.info("=  {} ".format(request.data))
+          return self.create(request)
+     def get(self,request):
+          logger.info("==  {} ".format(request.data))
+          return self.list(request)
+
+
+
+class BookingUpadateAndDeleteAndRetraiveByID(GenericAPIView,UpdateModelMixin,DestroyModelMixin,RetrieveModelMixin):
+     queryset=BookingHistory.objects.all()
+     serializer_class=BookingHistorySerializer
+     def put(self,request,**kwargs):
+          logger.info("===  {} ".format(request.data))
+          return self.update(request,**kwargs)
+     def delete(self,request,**kwargs):
+          logger.info("====  {} ".format(request.data))
+          return self.destroy(request,**kwargs)
+     def get(self,request,**kwargs):
+          logger.info("=====  {} ".format(request.data))
+          return self.retrieve(request,**kwargs)
