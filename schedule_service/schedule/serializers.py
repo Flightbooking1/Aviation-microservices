@@ -1,8 +1,7 @@
 from rest_framework import serializers
 from .models import *
 import logging
-logger = logging.getLogger(__name__)
-
+logger=logging.getLogger(__name__)
 
 class AirportSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,7 +14,7 @@ class FlightSerializer(serializers.ModelSerializer):
         model = Flight
         fields = ['id', 'flight_number', 'seating_capacity','status']
 
-
+        
 class ScheduleSerializer(serializers.ModelSerializer):
     source_airport = AirportSerializer()
     destination_airport = AirportSerializer()
@@ -40,6 +39,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
 
         destination_airport_data = validated_data.pop('destination_airport')
         try:
+
             destination_airport = Airport.objects.filter(
                 **destination_airport_data).first()
             if destination_airport is None:
@@ -78,7 +78,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Failed to create schedule.")
         return schedule
 
-
+      
 class SchedulesSerializer(serializers.ModelSerializer):
     source_airport = AirportSerializer()
     destination_airport = AirportSerializer()
@@ -91,6 +91,7 @@ class SchedulesSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         source_airport_data = validated_data.pop('source_airport')
         try:
+
             source_airport = Airport.objects.filter(
                 **source_airport_data).first()
             if source_airport is None:
@@ -143,3 +144,4 @@ class ScheduleRetrevieSerializer(serializers.ModelSerializer):
     class Meta:
         model = Schedule
         fields = '__all__'
+

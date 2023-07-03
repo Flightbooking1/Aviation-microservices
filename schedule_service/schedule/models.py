@@ -35,6 +35,6 @@ class Schedule(models.Model):
     base_price = models.FloatField(blank=False)
     flight = models.ForeignKey(Flight, on_delete=models.DO_NOTHING,blank=False)
     status = models.CharField(max_length=45, default='Active',blank=False)
-
+    
     class Meta:
         db_table = 'schedule'
