@@ -8,24 +8,33 @@
 from django.db import models
 
 class Flight(models.Model):
-    flight_number = models.IntegerField()
-    seating_capacity = models.IntegerField()
-    status = models.CharField(max_length=45)
+    flight_number = models.IntegerField(blank=False)
+    seating_capacity = models.IntegerField(blank=False)
+    status = models.CharField(max_length=45, default='Active',blank=False)
+
     class Meta:
         db_table = 'flight'
 
+
 class Airport(models.Model):
-    airport_name = models.CharField(max_length=45)
-    city = models.CharField(max_length=45)
+    airport_name = models.CharField(max_length=45,blank=False)
+    city = models.CharField(max_length=45,blank=False)
+    status = models.CharField(max_length=45, default='Active',blank=False)
+
     class Meta:
         db_table = 'airport'
+
 class Schedule(models.Model):
-    source_airport = models.ForeignKey(Airport, models.DO_NOTHING, db_column='source_airport', related_name='source_schedules')
-    destination_airport = models.ForeignKey(Airport, models.DO_NOTHING, db_column='destination_airport', related_name='destination_schedules')
-    arrival_time = models.DateTimeField()
-    departure_time = models.DateTimeField()
-    available_seats = models.IntegerField()
-    base_price = models.FloatField()
-    flight = models.ForeignKey(Flight, on_delete=models.DO_NOTHING)
+    source_airport = models.ForeignKey(
+        Airport, models.DO_NOTHING, db_column='source_airport', related_name='source_schedules',blank=False)
+    destination_airport = models.ForeignKey(
+        Airport, models.DO_NOTHING, db_column='destination_airport', related_name='destination_schedules',blank=False)
+    arrival_time = models.DateTimeField(blank=False)
+    departure_time = models.DateTimeField(blank=False)
+    available_seats = models.IntegerField(blank=False)
+    base_price = models.FloatField(blank=False)
+    flight = models.ForeignKey(Flight, on_delete=models.DO_NOTHING,blank=False)
+    status = models.CharField(max_length=45, default='Active',blank=False)
+    
     class Meta:
         db_table = 'schedule'

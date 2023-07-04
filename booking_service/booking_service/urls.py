@@ -1,22 +1,20 @@
-"""
-URL configuration for booking_service project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/4.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
-from django.contrib import admin
-from django.urls import path
+from django.urls import path,include
+from booking.views import *
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    
+    
+    # #booking
+    # path('booking/',booking ,name='booking'),
+    # path('getBooking/<int:id>',getBooking ,name='bookingId'),
+    # path('getTransactions/',TransactionInsertandGettingall.as_view() ,name='getTransactions'),
+    # path('transactionById/<int:pk>',TransactionUpadateAndDeleteAndRetraiveByID.as_view() ,name='transactionById'),
+    # path('getPassengers/',PassengerInsertandGettingall.as_view() ,name='getPassengers'),
+    # path('passengersById/<int:pk>',PassengerUpadateAndDeleteAndRetraiveByID.as_view() ,name='passengerById'),
+    # path('getTranactionByBookingId/<int:bookingId>',getTransactionByBookingId, name='getTransactionByBookingId' ),
+    # path('getPassengerByBookingId/<int:bookingId>', getPassengerByBookingId, name='getPassengerByBookingId' ),
+
+    #bookingHistory
+     path('',include('booking.urls'))
 ]
+

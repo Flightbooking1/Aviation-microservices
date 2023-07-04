@@ -16,4 +16,5 @@ urlpatterns = [
     path('patchFlight/<int:id>/',patchFlight,name='patchFlight'),
     path('patchSchedule/<int:id>/',patchSchedule,name='patchSchedule'),
     path('patchAvailableTickets/<int:id>/<int:available_seats>/',patchAvailableTickets,name='patchAvailableTickets'),
+
 ]
