@@ -1,7 +1,23 @@
 from rest_framework import serializers
 from booking.models import Seats
 from rest_framework import serializers
-from .models import Passenger, Transaction, Booking
+from .models import Passenger, Transaction, Booking ,BookingHistory
+from datetime import date as today_data
+from django.db import connection, transaction, IntegrityError
+from .custom_exceptions.DuplicatePNRNumber import DuplicatePNRNumberError
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+#BookingHistory 
+class BookingHistorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = BookingHistory
+        fields = '__all__'
+
+#seats 
 
 class SeatSerializer(serializers.ModelSerializer):
     class Meta:
@@ -33,20 +49,27 @@ class BookingSerializer(serializers.ModelSerializer):
     passengers = PassengerSerializer(many=True)
     
 
+
     class Meta:
         model = Booking
         fields = '__all__'
         
-
+    
     def create(self, validated_data):
         transaction_data = validated_data.pop('transaction')
         passenger_data = validated_data.pop('passengers')
-        print(transaction_data)
-        print(passenger_data)
+
+        # print(transaction_data)
+ 
         print(validated_data,"-----------------------------------")
 
         # Create the booking object with the transaction
-        booking = Booking.objects.create( **validated_data)
+        try:
+            booking = Booking.objects.create( **validated_data)
+        except :
+            # logger.error()
+            raise DuplicatePNRNumberError("Duplicate PNR Numer Submitted.........")
+       
         print("created booking--------------------")
 
         # Create the transaction object
@@ -58,12 +81,8 @@ class BookingSerializer(serializers.ModelSerializer):
 
             Passenger.objects.create(booking=booking, **passenger_item)
         print("created passengers ------------------------------------")
+
         return booking
-from .models import *
 
-#BookingHistory 
-class BookingHistorySerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = BookingHistory
-        fields = '__all__'
+
