@@ -14,7 +14,7 @@ class Booking(models.Model):
     bookingId = models.AutoField(primary_key=True, db_column='booking_id')
     email = models.EmailField(max_length=70, db_column='email')
     journeyDate = models.DateField(db_column='journey_date')
-    bookingDate = models.CharField(max_length=45, db_column='booking_date')
+    bookingDate = models.DateField(db_column='booking_date')
     status = models.CharField(max_length=45, db_column='status')
     pnrNumber = models.CharField(max_length=45, db_column='pnr_number')
     scheduleId = models.CharField(max_length=45, db_column='schedule_id')
@@ -34,6 +34,7 @@ class Transaction(models.Model):
     transactionStatus = models.CharField(max_length=45, db_column='transaction_status')
     transactionType = models.CharField(max_length=45, db_column='transaction_type')
     amount = models.FloatField()
+
     booking = models.OneToOneField(Booking, on_delete=models.CASCADE, db_column='booking_id')
     
 
@@ -51,6 +52,7 @@ class Passenger(models.Model):
     passengerAadhar = models.CharField(max_length=45, db_column='passenger_aadhar')
     passengerStatus = models.CharField(max_length=45, db_column='passenger_status')
     seatNumber = models.CharField(max_length=45, db_column='seat_number')
+
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE, db_column='booking_id_ref')
 
 
@@ -72,3 +74,11 @@ class BookingHistory(models.Model):
     class Meta:
         managed = False
         db_table = 'booking_history'
+
+    def __str__(self):
+        return " {} , {} , {} , {} , {} , {}".format(self.booking_history_id,
+                                                    self.no_of_tickets_booked,
+                                                    self.date,
+                                                    self.available_tickets,
+                                                    self.schedule_id,
+                                                    self.days_left)
