@@ -9,12 +9,12 @@ class AirportSerializer(serializers.ModelSerializer):
         fields = ['id', 'airport_name', 'city','status']
 
 
+
 class FlightSerializer(serializers.ModelSerializer):
     class Meta:
         model = Flight
         fields = ['id', 'flight_number', 'seating_capacity','status']
 
-        
 class ScheduleSerializer(serializers.ModelSerializer):
     source_airport = AirportSerializer()
     destination_airport = AirportSerializer()
@@ -34,12 +34,12 @@ class ScheduleSerializer(serializers.ModelSerializer):
                 raise Airport.DoesNotExist
             if source_airport.status != 'Active':
                 raise serializers.ValidationError("Airport is not active.")
+
         except Airport.DoesNotExist:
             raise serializers.ValidationError("Source airport does not exist.")
 
         destination_airport_data = validated_data.pop('destination_airport')
         try:
-
             destination_airport = Airport.objects.filter(
                 **destination_airport_data).first()
             if destination_airport is None:
@@ -91,9 +91,9 @@ class SchedulesSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         source_airport_data = validated_data.pop('source_airport')
         try:
-
             source_airport = Airport.objects.filter(
                 **source_airport_data).first()
+
             if source_airport is None:
                 raise Airport.DoesNotExist
         except Airport.DoesNotExist:
@@ -101,13 +101,11 @@ class SchedulesSerializer(serializers.ModelSerializer):
 
         destination_airport_data = validated_data.pop('destination_airport')
         try:
-            destination_airport = Airport.objects.filter(
-                **destination_airport_data).first()
+            destination_airport = Airport.objects.filter(**destination_airport_data).first()
             if destination_airport is None:
                 raise Airport.DoesNotExist
         except Airport.DoesNotExist:
-            raise serializers.ValidationError(
-                "Destination airport does not exist.")
+            raise serializers.ValidationError("Destination airport does not exist.")
 
         flight_data = validated_data.pop('flight')
         try:
@@ -121,15 +119,12 @@ class SchedulesSerializer(serializers.ModelSerializer):
         instance.source_airport = source_airport
         instance.destination_airport = destination_airport
         instance.flight = flight
-        instance.arrival_time = validated_data.get(
-            'arrival_time', instance.arrival_time)  # Update other fields as needed
-        instance.departure_time = validated_data.get(
-            'departure_time', instance.departure_time)
-        instance.available_seats = validated_data.get(
-            'available_seats', instance.available_seats)
-        instance.base_price = validated_data.get(
-            'base_price', instance.base_price)
 
+        instance.arrival_time = validated_data.get('arrival_time', instance.arrival_time)  # Update other fields as needed
+        instance.departure_time = validated_data.get('departure_time', instance.departure_time)
+        instance.available_seats = validated_data.get('available_seats', instance.available_seats)
+        instance.base_price = validated_data.get('base_price', instance.base_price)
+       
         # ...
 
         instance.save()  # Save the updated instance
@@ -144,4 +139,3 @@ class ScheduleRetrevieSerializer(serializers.ModelSerializer):
     class Meta:
         model = Schedule
         fields = '__all__'
-

@@ -85,6 +85,7 @@ def patchAirport(request, id):
           airport.status="Active"
     else:
         airport.status="Active"
+        
     try:
         # Save the updated airport object
         airport.save()
@@ -120,7 +121,6 @@ class FlightInsertandGettingall(GenericAPIView, CreateModelMixin, ListModelMixin
                 "An error occurred while getAll Flights: %s", str(e))
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
 class FlightupdateAndDeleteAndRetraiveByID(GenericAPIView, UpdateModelMixin, DestroyModelMixin, RetrieveModelMixin):
     queryset = Flight.objects.all()
     serializer_class = FlightSerializer
@@ -152,7 +152,7 @@ class FlightupdateAndDeleteAndRetraiveByID(GenericAPIView, UpdateModelMixin, Des
                 "An error occurred while getById a Flight: %s", str(e))
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
+          
 @api_view(['PATCH'])
 def patchFlight(request, id):
     logger.info("Enter into patch Flight")
@@ -162,12 +162,13 @@ def patchFlight(request, id):
         return Response({'error': 'Flight not found'}, status=status.HTTP_404_NOT_FOUND)
 
     # Assign the field value "InActive" to the desired field
-    if(flight.status=="Active"):
+    if (flight.status == "Active"):
         flight.status = "InActive"
-    elif(flight.status=="InActive"):
-        flight.status="Active"
+    elif (flight.status == "InActive"):
+        flight.status = "Active"
     else:
-        flight.status="Active"
+        flight.status = "Active"
+
     try:
      # Save the updated Flight object
         flight.save()
@@ -185,18 +186,11 @@ def patchFlight(request, id):
 def inserting(request):
     try:
         logger.info(request.data)
-        #    airport_data = Airport.objects.all()
-        #    logger.info("getting %s", airport_data)
-        #    data = airport_data
-        #    logger.info(data)
-        #    source_airport_data = request.data.get('source_airport')
-        #    logger.info(source_airport_data, "id not %s")
-        #    source_airport_id = source_airport_data.get('id')
-        #    logger.info(source_airport_id, "id not %s")
         serilizer = ScheduleSerializer(data=request.data,)
         if serilizer.is_valid():
             logger.info("Enter into inserting schedule")
-            serilizer.save()            
+            serilizer.save()
+
             return Response(serilizer.data)
         else:
             logger.exception(
@@ -231,6 +225,9 @@ def getById(request, id):
         logger.error(f"Schedule with id {id} does not exist.")
         return Response({'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
 
+    except Schedule.DoesNotExist as e:
+        logger.error(f"Schedule with id {id} does not exist.")
+        return Response({'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['PUT'])
 def updateSchedule(request, id):
@@ -269,7 +266,14 @@ def patchSchedule(request, id):
         return Response({'error': 'Schedule not found'}, status=status.HTTP_404_NOT_FOUND)
 
     # Assign the field value "InActive" to the desired field
-    schedule.status = "InActive"
+   
+    if (schedule.status == "Active"):
+        schedule.status = "InActive"
+    elif (schedule.status == "InActive"):
+        schedule.status = "Active"
+    else:
+        schedule.status = "Active"
+
     try:
         # Save the updated Schedule object
         schedule.save()
@@ -278,5 +282,37 @@ def patchSchedule(request, id):
         serializer = ScheduleSerializer(schedule)
         return Response(serializer.data)
     except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['PATCH'])
+def patchAvailableTickets(request, id, available_seats):
+    logger.info("Entered into update avilable_tickets in  Schedule ")
+    logger.info("  get the available seats {}".format(
+        request.data.get('available_seats')))
+
+    try:
+        schedule = Schedule.objects.get(id=id)
+
+        logger.info(" arrival time{}".format(schedule.arrival_time))
+
+    except Schedule.DoesNotExist:
+        logger.info("Schedule not found")
+        return Response({'error': 'Schedule not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Assign the field value available_seats to the desired field
+    schedule.available_seats = available_seats
+    try:
+        logger.info("enter into try block of patch {}".format(
+            schedule.available_seats))
+        # Save the updated Schedule object
+        schedule.save()
+        logger.info("saved successfully schedule")
+        # Return the serialized data in the response
+        serializer = ScheduleSerializer(schedule)
+        logger.info("serialized data {}".format(serializer.data))
+        return Response(serializer.data)
+    except Exception as e:
+        logger.info("Exception in patch for availableSeats")
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

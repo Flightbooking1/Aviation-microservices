@@ -144,6 +144,7 @@ LOGGING = {
         'level': 'INFO',  # Adjust the logging level as per your needs
     },
 }
+
 # CORS_ORIGIN_ALLOW_ALL = False
 
 # CORS_ORIGIN_WHITELIST = [
@@ -176,4 +177,5 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
+
 
