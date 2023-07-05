@@ -1,28 +1,30 @@
 from .views import *
 from django.db import connection
+import logging
 
+logger = logging.getLogger(__name__)
 class BookingHistoryService:
     def saveBh(self,args):
-        logget.info("Entered into saveBh")
-        logget.info("BookingHistoryService.saveBh ========= {} ".format(args))
+        logger.info("Entered into saveBh")
+        logger.info("BookingHistoryService.saveBh ========= {} ".format(args))
         
         cursor = connection.cursor()
         cursor.execute(f"SELECT * FROM `booking-module`.booking_history WHERE date='{args.date}'and schedule_id='{args.schedule_id}' ;")
         result = cursor.fetchone()
     
-        logget.info(" =========== {}".format(result))
+        logger.info(" =========== {}".format(result))
         try:
             bk = BookingHistory.objects.get(schedule_id=args.schedule_id, date=args.date)
-            logget.info(" =========== ************************** {}".format(bk))
+            logger.info(" =========== ************************** {}".format(bk))
             bhSerial= BookingHistorySerializer(args)
-            logget.info(">>>>>>>>>>>>>>>>>. {}".format(bk.available_tickets - bhSerial.data['no_of_tickets_booked']))
+            logger.info(">>>>>>>>>>>>>>>>>. {}".format(bk.available_tickets - bhSerial.data['no_of_tickets_booked']))
             bhv = BookingHistory.objects.get(booking_history_id=bk.booking_history_id)
             bhv.no_of_tickets_booked = bk.no_of_tickets_booked + bhSerial.data['no_of_tickets_booked']
             bhv.available_tickets = bk.available_tickets - bhSerial.data['no_of_tickets_booked']
             bhv.save()
-            logget.info("  --------------------------- {}".format(bhv))
+            logger.info("  --------------------------- {}".format(bhv))
         except BookingHistory.DoesNotExist:
-            logget.info("Booking history not found for the provided schedule_id and date.")
+            logger.info("Booking history not found for the provided schedule_id and date.")
             bhSerial= BookingHistorySerializer(args)
            
             bhv =BookingHistory.objects.create(
@@ -33,7 +35,7 @@ class BookingHistoryService:
                 schedule_id=bhSerial.data['schedule_id']
             )
           
-            logget.info(bhv)
+            logger.info(bhv)
            
         
 
@@ -66,13 +68,13 @@ class BookingHistoryService:
         #     print("  --------------------------- {}".format(bhv))
     
     def deleteBh(self,schedule_id, no_of_tickets_canceled ):
-        logget.info("Entered into deleteBh ")
-        logget.info(schedule_id)
+        logger.info("Entered into deleteBh ")
+        logger.info(schedule_id)
         try:
             bk = BookingHistory.objects.get(schedule_id=schedule_id, date=today_data.today())
             
-            logget.info(bk)
+            logger.info(bk)
         except BookingHistory.DoesNotExist as e:
-            logget.info("While Deleting Booking Histort = {}".format(e))
+            logger.info("While Deleting Booking Histort = {}".format(e))
 
         

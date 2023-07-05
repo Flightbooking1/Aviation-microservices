@@ -160,12 +160,12 @@ def booking(request):
                          
                
                        
-                         logget.info("****************************************************")
+                         logger.info("****************************************************")
                          # FOR GETTING NO OF TICKETS BOOKED PREVIOUSLI
                          cursor = connection.cursor()
                          cursor.execute(f"select sum(no_of_tickets_booked) from `booking-module`.booking_history where schedule_id={booking.scheduleId};")
                          result = cursor.fetchone()
-                         logget.info(result[0]) #2 
+                         logger.info(result[0]) #2 
                          # tickets_booked_previous = int(result[0])
                          
                          sum_of_tickets = 0
@@ -176,8 +176,8 @@ def booking(request):
                               sum_of_tickets = result[0]
 
                          
-                         logget.info("+++++++++++++++++++++++++{}".format(sum_of_tickets))
-                         logget.info((booking.journeyDate - booking.bookingDate).days)
+                         logger.info("+++++++++++++++++++++++++{}".format(sum_of_tickets))
+                         logger.info((booking.journeyDate - booking.bookingDate).days)
 
                          #getting schedule object for getiing flight seating capacity 
                          response = reqs.get(f"http://localhost:9003/schedule/getById/{booking.scheduleId}")
@@ -199,7 +199,7 @@ def booking(request):
                          bh.saveBh(bookinghistory)
 
 
-                         logget.info(" {}".format(schedule_data))
+                         logger.info(" {}".format(schedule_data))
                         
                          # updating seats avialable in schedule       
                          available_seats = int(seating_capacity-sum_of_tickets-len(passengers))
@@ -210,7 +210,7 @@ def booking(request):
                          
                          
                          response = reqs.patch(url)
-                         logget.info(response)
+                         logger.info(response)
 
                          # bk = BookingHistory.objects.get(date=today_data.today())
                          # print(bk)
@@ -218,7 +218,7 @@ def booking(request):
                          return Response([retriveSerializer.data,transactionSerializer.data,passengerSerializer.data], status= status.HTTP_201_CREATED)
                     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
           except IntegrityError as i:
-                    logget.info(i)
+                    logger.info(i)
                
               
           
@@ -226,7 +226,7 @@ def booking(request):
           booking = Booking.objects.all()
           serializer = BookingRetrieveSerializer(data=booking, many=True)
           serializer.is_valid()
-          logget.info(serializer.data)
+          logger.info(serializer.data)
           return Response(serializer.data, status=status.HTTP_200_OK)
           
 
@@ -247,7 +247,7 @@ def getBooking(request,id):
      else:
           booking = Booking.objects.get(bookingId=id)
 
-          logget.info(" ++ {} {} {} {} {} {} {}" .format(booking.bookingDate,booking.bookingId,booking.email, 
+          logger.info(" ++ {} {} {} {} {} {} {}" .format(booking.bookingDate,booking.bookingId,booking.email, 
                                                   booking.pnrNumber, booking.status, booking.journeyDate, booking.scheduleId))
 
           
@@ -255,7 +255,7 @@ def getBooking(request,id):
           
           passengers = Passenger.objects.filter(booking= id)
 
-          logget.info(len(passengers))
+          logger.info(len(passengers))
 
       
           bh = BookingHistoryService()
@@ -288,7 +288,7 @@ class BookingInsertandGettingall(GenericAPIView,CreateModelMixin,ListModelMixin)
 
 
 
-class BookingUpadateAndDeleteAndRetraiveByID(GenericAPIView,UpdateModelMixin,DestroyModelMixin,RetrieveModelMixin):
+class BookingUpadateAndDeleteAndRetraiveByID(GenericAPIView,UpdateModelMixin,DestroyModelMixin,RetrieveModelMixin,ListModelMixin):
      queryset=BookingHistory.objects.all()
      serializer_class=BookingHistorySerializer
      def put(self,request,**kwargs):
@@ -299,4 +299,4 @@ class BookingUpadateAndDeleteAndRetraiveByID(GenericAPIView,UpdateModelMixin,Des
           return self.destroy(request,**kwargs)
      def get(self,request,**kwargs):
           logger.info("=====  {} ".format(request.data))
-          return self.retrieve(request,**kwargs)
+          return self.list(request,**kwargs)
