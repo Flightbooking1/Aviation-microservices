@@ -22,8 +22,8 @@ urlpatterns = [
     path('getPassengerByBookingId/<int:bookingId>', getPassengerByBookingId, name='getPassengerByBookingId' ),
 
     #Booking History
-    path('bookingInsertandGettingall/',BookingInsertandGettingall.as_view(),name="StudentInsertandGettingall"),
-    path('bookingupadateAndDeleteAndRetraiveByID/<int:pk>/',BookingUpadateAndDeleteAndRetraiveByID.as_view(),name="ByID"),
+    path('bookingInsertandGettingall/',BookingInsertandGettingall.as_view(),name="BookingInsertandGettingall"),
+    path('bookingupadateAndDeleteAndRetraiveByID/<int:pk>/',BookingUpadateAndDeleteAndRetraiveByID.as_view(),name="BookingUpadateAndDeleteAndRetraiveByID"),
 
 
 ]

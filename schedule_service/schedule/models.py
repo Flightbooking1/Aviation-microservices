@@ -17,7 +17,7 @@ class Flight(models.Model):
 
 
 class Airport(models.Model):
-    airport_name = models.CharField(max_length=45,blank=False)
+    airport_name = models.CharField(max_length=255,blank=False)
     city = models.CharField(max_length=45,blank=False)
     status = models.CharField(max_length=45, default='Active',blank=False)
 

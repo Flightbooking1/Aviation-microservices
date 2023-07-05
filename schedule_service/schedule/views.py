@@ -7,6 +7,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, DestroyModelMixin, CreateModelMixin, UpdateModelMixin
 from .models import *
 from .serializers import *
+from datetime import datetime
 import logging
 logger = logging.getLogger(__name__)
 
@@ -267,6 +268,9 @@ def patchSchedule(request, id):
 
     # Assign the field value "InActive" to the desired field
    
+
+    
+
     if (schedule.status == "Active"):
         schedule.status = "InActive"
     elif (schedule.status == "InActive"):
@@ -274,6 +278,7 @@ def patchSchedule(request, id):
     else:
         schedule.status = "Active"
 
+    # if(schedule.arrival_time)
     try:
         # Save the updated Schedule object
         schedule.save()
@@ -315,4 +320,40 @@ def patchAvailableTickets(request, id, available_seats):
     except Exception as e:
         logger.info("Exception in patch for availableSeats")
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+@api_view(['PATCH'])
+def patchScheduleByTime(request, id):
+    logger.info("Enter into insert Schedule")
+    try:
+        schedule = Schedule.objects.get(id=id)
+    except Schedule.DoesNotExist:
+        return Response({'error': 'Schedule not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Assign the field value "InActive" to the desired field
+   
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")
+    logger.info(current_time)
+    arr=schedule.arrival_time.strftime("%H:%M:%S")
+    logger.info(arr)
+    if (current_time>arr):
+        logger.info("checking")
+        schedule.status =="Active"
+    else:
+        schedule.status =="InActive"
+
+    # if(schedule.arrival_time)
+    try:
+        # Save the updated Schedule object
+        schedule.save()
+
+        # Return the serialized data in the response
+        serializer = ScheduleSerializer(schedule)
+        return Response(serializer.data)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    
+
 

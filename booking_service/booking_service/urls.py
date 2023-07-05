@@ -15,6 +15,6 @@ urlpatterns = [
     # path('getPassengerByBookingId/<int:bookingId>', getPassengerByBookingId, name='getPassengerByBookingId' ),
 
     #bookingHistory
-     path('',include('booking.urls'))
+     path('booking/',include('booking.urls'))
 ]
 
