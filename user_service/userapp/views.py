@@ -5,7 +5,6 @@ from rest_framework.mixins import  ListModelMixin,RetrieveModelMixin,DestroyMode
 from rest_framework.exceptions import AuthenticationFailed
 from .serializers import *
 from django.contrib.auth import authenticate
-from rest_framework.permissions import IsAuthenticated   
 from .models import User
 from rest_framework import status
 import jwt, datetime
@@ -17,13 +16,29 @@ from rest_framework.response import Response
 from django.core.mail import send_mail
 from django.contrib.auth.models import User
 import random
-from rest_framework_simplejwt.tokens import AccessToken
 from django.contrib.auth.hashers import make_password
 User = get_user_model()
  
 logger=logging.getLogger(__name__)
 
-# Create your views here.
+
+def authorizeUser(token,role):
+        # token = request.headers.get('Authorization')
+        # role=request.headers.get('role')
+        if not token:
+            raise AuthenticationFailed("Not Authorized")
+        token = token.split('Bearer ')[1:]
+        if not token:
+            raise AuthenticationFailed("Invalid token")
+        token = token[0]
+        try:
+            payload = jwt.decode(token, "secret", algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('Not Authorized')
+
+
+
+# Register
 class RegisterView(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
@@ -31,22 +46,20 @@ class RegisterView(APIView):
         serializer.save()
         return Response(serializer.data)
 
-
-
-
-    
+#Login
 class LoginView(APIView):
     def post(self, request):
         data = request.data
         email = data.get('email')
         password = data.get('password')
-        
         user = authenticate(email=email, password=password)
+        logger.info(user)
         if not user:
             raise AuthenticationFailed('Incorrect email or password!')
 
         payload = {
-            'id': user.email,
+            'email': user.email,
+            'role':user.role,
             'iat': datetime.datetime.utcnow(),
             'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60)
         }
@@ -62,7 +75,8 @@ class LoginView(APIView):
             'user': UserSerializer(user_details).data  # Include serialized user details
         }
         return response
-    
+
+#User Details 
 class UserView(APIView):
     def get(self, request):
         token = request.COOKIES.get('jwt')
@@ -80,21 +94,10 @@ class UserView(APIView):
         serializer = UserSerializer(user)
         return Response(serializer.data)   
 
-class LogoutView(APIView):
-    def post(self, request):
-        response = Response()
-        response.delete_cookie('jwt')
-        response.data = {
-            'message': 'success'
-        }
-        return response
-# class ForgotPassword():
-#     def post():
-
+#Get all Emails
 class GetAllUsersEmail(GenericAPIView, ListModelMixin):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-
     def get(self, request):
         try:
             response = self.list(request)
@@ -105,16 +108,20 @@ class GetAllUsersEmail(GenericAPIView, ListModelMixin):
             return Response(status= status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 
-
+#Get all Users
 class GettingAllUsers(GenericAPIView,ListModelMixin):
      queryset = User.objects.all()
      serializer_class=UserSerializer
      def get(self,request):
+        token = request.headers.get('Authorization')
+        role=request.headers.get('role')
+        authorizeUser(token,role)
         try:
            return self.list(request)
         except Exception as e:
             logger.exception("An error occurred while getting all users")
-     
+
+#Update User   
 class UpdateUser(GenericAPIView,UpdateModelMixin):
       queryset = User.objects.all()
       serializer_class=UserSerializer
@@ -123,7 +130,8 @@ class UpdateUser(GenericAPIView,UpdateModelMixin):
             return self.update(request,**kwargs)
           except Exception as e:
               logger.exception("An error occurred while update a user: %s", str(e))
-      
+              return Response(status= status.HTTP_500_INTERNAL_SERVER_ERROR)
+#Delete User     
 class DeleteUser(GenericAPIView,DestroyModelMixin):
        queryset = User.objects.all()
        serializer_class=UserSerializer
@@ -134,6 +142,7 @@ class DeleteUser(GenericAPIView,DestroyModelMixin):
               logger.exception("An error occurred while delete the user: %s")
               print("id is not there")
 
+#Get By Id
 class GetById(GenericAPIView,RetrieveModelMixin):
       queryset = User.objects.all()
       serializer_class=UserSerializer
@@ -141,7 +150,9 @@ class GetById(GenericAPIView,RetrieveModelMixin):
            try:
              return self.retrieve(request,**kwargs)  
            except Exception as e:
-               logger.exception("An error occurred while getting a user By Id")         
+               logger.exception("An error occurred while getting a user By Id")  
+
+#Forgot password       
 class ForgotPasswordAPIView(APIView):
     def post(self, request):
         email = request.data.get('email')
@@ -165,16 +176,15 @@ class ForgotPasswordAPIView(APIView):
             return Response({'message': 'OTP sent successfully.', 'Secretkey': otp+12345})
         except Exception as e:
             logger.error(f'Failed to send OTP: {e}')
-
         return Response({'message': 'Failed to send OTP.'}, status=500)
 
+#ChangePassword
 class ChangePassword(APIView):
     def put(self, request, id):
         try:
             user = User.objects.get(user_id=id)
         except User.DoesNotExist:
             return Response({'error': 'User not found'}, status=404)
-
         new_password = request.data.get('new_password')
         if new_password:
             user.password = make_password(new_password)
@@ -183,6 +193,7 @@ class ChangePassword(APIView):
         else:
             return Response({'error': 'New password not provided'}, status=400)   
 
+#New password
 class newpassword(APIView):
     def put(self,request,email):
         try:
@@ -196,7 +207,8 @@ class newpassword(APIView):
             return Response({'message': 'Password changed successfully'}, status=200)
         else:
             return Response({'error': 'New password not provided'}, status=400) 
-        
+
+#Get By Email      
 class GetByEmail(generics.RetrieveAPIView):
       serializer_class = UserSerializer
       def get_object(self):
@@ -224,5 +236,15 @@ class GetByEmail(generics.RetrieveAPIView):
 #         response.data = {
 #             'access_token': str(access_token),
 #             'user': UserSerializer(user_details).data  # Include serialized user details
+#         }
+#         return response
+
+
+# class LogoutView(APIView):
+#     def post(self, request):
+#         response = Response()
+#         response.delete_cookie('jwt')
+#         response.data = {
+#             'message': 'success'
 #         }
 #         return response
