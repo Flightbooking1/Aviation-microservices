@@ -1,3 +1,4 @@
+from booking.models import BookingHistory
 from .views import *
 from django.db import connection
 import logging

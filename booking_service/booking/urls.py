@@ -24,6 +24,6 @@ urlpatterns = [
     #Booking History
     path('bookingInsertandGettingall/',BookingInsertandGettingall.as_view(),name="BookingInsertandGettingall"),
     path('bookingupadateAndDeleteAndRetraiveByID/<int:pk>/',BookingUpadateAndDeleteAndRetraiveByID.as_view(),name="BookingUpadateAndDeleteAndRetraiveByID"),
-
+    path('rest/schedule/<int:schedule_id>/', getSeatsByScheduleId, name='get-seats-by-schedule-id')
 
 ]

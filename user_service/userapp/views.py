@@ -41,10 +41,17 @@ def authorizeUser(token,role):
 # Register
 class RegisterView(APIView):
     def post(self, request):
+
+        logger.info("User_service POST method for register")
+
         serializer = UserSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+        
+        if serializer.is_valid():
+            serializer.save()
+            user= Response(serializer.data, status=status.HTTP_201_CREATED)
+            logger.info("{}".format(user.data))
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 #Login
 class LoginView(APIView):
@@ -89,7 +96,7 @@ class UserView(APIView):
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed('Unauthenticated!')
 
-        user = User.objects.filter(email=payload['id']).first()
+        user = User.objects.filter(email=payload['email']).first()
         print(user)
         serializer = UserSerializer(user)
         return Response(serializer.data)   

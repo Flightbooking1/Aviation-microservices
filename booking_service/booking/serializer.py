@@ -78,7 +78,6 @@ class BookingSerializer(serializers.ModelSerializer):
 
         # Create the passenger objects and associate them with the booking
         for passenger_item in passenger_data:
-
             Passenger.objects.create(booking=booking, **passenger_item)
         print("created passengers ------------------------------------")
 
