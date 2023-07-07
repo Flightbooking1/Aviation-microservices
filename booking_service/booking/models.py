@@ -52,7 +52,6 @@ class Passenger(models.Model):
     passengerAadhar = models.CharField(max_length=45, db_column='passenger_aadhar')
     passengerStatus = models.CharField(max_length=45, db_column='passenger_status')
     seatNumber = models.CharField(max_length=45, db_column='seat_number')
-
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE, db_column='booking_id_ref')
 
 

@@ -9,6 +9,8 @@ from .models import *
 from .serializers import *
 from datetime import datetime
 import logging
+from rest_framework.exceptions import AuthenticationFailed
+import jwt
 logger = logging.getLogger(__name__)
 
 # Create your views here.
@@ -21,6 +23,8 @@ class AirportInsertandGettingall(GenericAPIView, CreateModelMixin, ListModelMixi
     serializer_class = AirportSerializer
 
     def post(self, request):
+        token = request.headers.get('Authorization')
+        authorizeUser(token)
         logger.info("Enter into insert Airport")
         try:
             return self.create(request)
@@ -44,6 +48,8 @@ class updateAndDeleteAndRetraiveByID(GenericAPIView, UpdateModelMixin, DestroyMo
     serializer_class = AirportSerializer
 
     def put(self, request, **kwargs):
+        token = request.headers.get('Authorization')
+        authorizeUser(token)
         logger.info("Enter into update Airport")
         try:
             return self.update(request, **kwargs)
@@ -54,6 +60,8 @@ class updateAndDeleteAndRetraiveByID(GenericAPIView, UpdateModelMixin, DestroyMo
 
     def delete(self, request, **kwargs):
         logger.info("Enter into delete Airport")
+        token = request.headers.get('Authorization')
+        authorizeUser(token)
         try:
             return self.destroy(request, **kwargs)
         except Exception as e:
@@ -105,6 +113,8 @@ class FlightInsertandGettingall(GenericAPIView, CreateModelMixin, ListModelMixin
     serializer_class = FlightSerializer
 
     def post(self, request):
+        token = request.headers.get('Authorization')
+        authorizeUser(token)
         logger.info("Enter into insert Flight")
         try:
             return self.create(request)
@@ -127,6 +137,8 @@ class FlightupdateAndDeleteAndRetraiveByID(GenericAPIView, UpdateModelMixin, Des
     serializer_class = FlightSerializer
 
     def put(self, request, **kwargs):
+        token = request.headers.get('Authorization')
+        authorizeUser(token)
         logger.info("Enter into update Flight")
         try:
             return self.update(request, **kwargs)
@@ -137,6 +149,8 @@ class FlightupdateAndDeleteAndRetraiveByID(GenericAPIView, UpdateModelMixin, Des
 
     def delete(self, request, **kwargs):
         logger.info("Enter into delete Flight")
+        token = request.headers.get('Authorization')
+        authorizeUser(token)
         try:
             return self.destroy(request, **kwargs)
         except Exception as e:
@@ -185,6 +199,9 @@ def patchFlight(request, id):
 
 @api_view(['POST'])
 def inserting(request):
+    logger.info("Enter into inserting schedule before authorize")
+    token = request.headers.get('Authorization')
+    authorizeUser(token)
     try:
         logger.info(request.data)
         serilizer = ScheduleSerializer(data=request.data,)
@@ -233,6 +250,8 @@ def getById(request, id):
 @api_view(['PUT'])
 def updateSchedule(request, id):
     logger.info("Enter into update Schedule")
+    token = request.headers.get('Authorization')
+    authorizeUser(token)
     try:
         logger.info(request.data)
         up_data = Schedule.objects.get(id=id)
@@ -248,6 +267,8 @@ def updateSchedule(request, id):
 @api_view(['DELETE'])
 def deleteSchedule(request, id):
     logger.info("Enter into delete Schedule")
+    token = request.headers.get('Authorization')
+    authorizeUser(token)
     try:
         del_data = Schedule.objects.get(id=id)
         logger.info("delete schedule", del_data)
@@ -268,9 +289,6 @@ def patchSchedule(request, id):
 
     # Assign the field value "InActive" to the desired field
    
-
-    
-
     if (schedule.status == "Active"):
         schedule.status = "InActive"
     elif (schedule.status == "InActive"):
@@ -354,6 +372,25 @@ def patchScheduleByTime(request, id):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    
+# ------------------- Autherization----------------------------
+
+def authorizeUser(token):
+        # token = request.headers.get('Authorization')
+        # role=request.headers.get('role')
+        logger.info("authorize method")
+        if not token:
+            raise AuthenticationFailed("Not Authorized")
+        
+        token = token.split('Bearer ')[1:]
+        if not token:
+            raise AuthenticationFailed("Invalid token")
+        token = token[0]
+        try:
+            payload = jwt.decode(token, "secret", algorithms=['HS256'])
+            if payload['role']!= "admin":
+                logger.info("role: %s",payload['role'])
+                raise AuthenticationFailed("Not an Admin")    
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('Not Authorized')   
 
 
